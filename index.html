@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustNet-SDN | Dynamic Graph Trust Network & Smart NIC Analytics</title>
+  <!-- Cytoscape.js & Chart.js CDNs for instant plug-and-play -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts & Modern Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <!-- Top Navigation Ribbon -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+        </svg>
+      </div>
+      <div>
+        <h1>TrustNet-SDN</h1>
+        <span class="subtext">Dynamic Graph Trust Networks & Smart NIC DPU Orchestrator</span>
+      </div>
+    </div>
+
+    <!-- Global KPI Quick Banner -->
+    <div class="header-metrics">
+      <div class="h-metric">
+        <span class="lbl">NETWORK HEALTH</span>
+        <span class="val text-success" id="hdr-health">98.4%</span>
+      </div>
+      <div class="h-metric">
+        <span class="lbl">GLOBAL TRUST</span>
+        <span class="val text-cyan" id="hdr-trust">94.8</span>
+      </div>
+      <div class="h-metric">
+        <span class="lbl">HW OFFLOAD RATIO</span>
+        <span class="val text-purple" id="hdr-offload">88.5%</span>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <div class="conn-status" id="conn-status-pill">
+        <span class="pulse-dot"></span>
+        <span id="conn-status-text">Connecting WebSocket...</span>
+      </div>
+      <button class="btn btn-secondary" id="btn-reset-layout" title="Reset Graph Layout">Auto Layout</button>
+      <button class="btn btn-danger" id="btn-quick-attack" title="Inject Security Anomaly">Inject Attack</button>
+    </div>
+  </header>
+
+  <!-- Main Multi-Panel Workspace -->
+  <main class="main-container">
+    
+    <!-- LEFT PANEL: Topology Canvas & Drag-and-Drop Node Palette -->
+    <section class="topology-panel">
+      <!-- Toolbar -->
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>Dynamic Trust Topology</h2>
+          <span class="badge">Cytoscape Graph Engine</span>
+        </div>
+        <div class="canvas-actions">
+          <select id="layout-select" class="form-select">
+            <option value="cose">Force-Directed (CoSE)</option>
+            <option value="concentric">Concentric Tiered</option>
+            <option value="grid">Grid Alignment</option>
+          </select>
+          <button class="btn btn-icon" id="btn-add-link-mode" title="Toggle Connect Nodes Mode">🔗 Link</button>
+          <button class="btn btn-icon" id="btn-fit-graph" title="Fit to Screen">⛶ Fit</button>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Node Palette -->
+      <div class="node-palette">
+        <span class="palette-label">DRAG TO ADD:</span>
+        <div class="palette-item" draggable="true" data-type="smart_nic">
+          <span class="badge-dot dot-nic"></span> Smart NIC DPU
+        </div>
+        <div class="palette-item" draggable="true" data-type="sdn_switch">
+          <span class="badge-dot dot-switch"></span> SDN Switch
+        </div>
+        <div class="palette-item" draggable="true" data-type="host_compute">
+          <span class="badge-dot dot-host"></span> Compute Host
+        </div>
+        <div class="palette-item" draggable="true" data-type="gateway">
+          <span class="badge-dot dot-gw"></span> Border GW
+        </div>
+      </div>
+
+      <!-- Graph Viewport -->
+      <div id="cy" class="cytoscape-canvas"></div>
+
+      <!-- Node Hardware Inspector Floating Drawer -->
+      <div id="node-inspector" class="node-inspector hidden">
+        <div class="inspector-header">
+          <h3 id="insp-title">Smart NIC DPU 01</h3>
+          <button class="btn-close" id="btn-close-inspector">&times;</button>
+        </div>
+        <div class="inspector-body">
+          <div class="insp-stat-grid">
+            <div class="insp-item">
+              <span class="label">Hardware Attestation</span>
+              <span class="value text-success" id="insp-attest">PCR VALID</span>
+            </div>
+            <div class="insp-item">
+              <span class="label">Trust Index</span>
+              <span class="value text-cyan" id="insp-trust">96.2 / 100</span>
+            </div>
+            <div class="insp-item">
+              <span class="label">DPU Offload Rate</span>
+              <span class="value" id="insp-offload">24,500 pps</span>
+            </div>
+            <div class="insp-item">
+              <span class="label">Crypto Engine</span>
+              <span class="value text-purple" id="insp-crypto">HW IPsec Active</span>
+            </div>
+            <div class="insp-item">
+              <span class="label">DPU Temp / CPU</span>
+              <span class="value" id="insp-temp">48°C | 19%</span>
+            </div>
+            <div class="insp-item">
+              <span class="label">Tamper Events</span>
+              <span class="value text-warning" id="insp-tamper">0 detected</span>
+            </div>
+          </div>
+
+          <div class="inspector-actions">
+            <button class="btn btn-sm btn-outline-danger" id="btn-tamper-node">Inject Firmware Tamper</button>
+            <button class="btn btn-sm btn-outline-warning" id="btn-flood-node">Inject DPU Flood</button>
+            <button class="btn btn-sm btn-success" id="btn-remediate-node">Remediate & Re-Attest</button>
+            <button class="btn btn-sm btn-danger" id="btn-delete-node">Remove Node</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Power BI Style Analytics Dashboard -->
+    <section class="dashboard-panel">
+      <!-- Power BI Style Filter Bar / Slicers -->
+      <div class="pbi-slicer-bar">
+        <div class="slicer-group">
+          <span class="slicer-title">FILTER BY NODE TYPE:</span>
+          <div class="slicer-buttons" id="slicer-type-buttons">
+            <button class="slicer-btn active" data-filter="all">All</button>
+            <button class="slicer-btn" data-filter="smart_nic">Smart NICs</button>
+            <button class="slicer-btn" data-filter="sdn_switch">Switches</button>
+            <button class="slicer-btn" data-filter="host_compute">Hosts</button>
+          </div>
+        </div>
+        <div class="slicer-group">
+          <span class="slicer-title">MIN TRUST SLICER: <strong id="trust-slider-val">0</strong></span>
+          <input type="range" id="trust-threshold-slider" min="0" max="100" value="0" class="slider">
+        </div>
+      </div>
+
+      <!-- Power BI Metric KPI Cards Row -->
+      <div class="pbi-kpi-grid">
+        <div class="pbi-card kpi-card">
+          <div class="kpi-icon icon-health">🛡️</div>
+          <div class="kpi-content">
+            <span class="kpi-title">GLOBAL NETWORK HEALTH</span>
+            <div class="kpi-value-row">
+              <span class="kpi-val" id="kpi-health">98.4%</span>
+              <span class="kpi-badge badge-up">▲ Zero-Trust OK</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pbi-card kpi-card">
+          <div class="kpi-icon icon-trust">⭐</div>
+          <div class="kpi-content">
+            <span class="kpi-title">EIGENTRUST INDEX</span>
+            <div class="kpi-value-row">
+              <span class="kpi-val text-cyan" id="kpi-trust">94.8</span>
+              <span class="kpi-badge badge-neutral">Graph Rank</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pbi-card kpi-card">
+          <div class="kpi-icon icon-dpu">⚡</div>
+          <div class="kpi-content">
+            <span class="kpi-title">HARDWARE OFFLOAD RATIO</span>
+            <div class="kpi-value-row">
+              <span class="kpi-val text-purple" id="kpi-offload">88.5%</span>
+              <span class="kpi-badge badge-up">Kernel Bypass</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pbi-card kpi-card">
+          <div class="kpi-icon icon-crypto">🔒</div>
+          <div class="kpi-content">
+            <span class="kpi-title">CRYPTOGRAPHIC INTEGRITY</span>
+            <div class="kpi-value-row">
+              <span class="kpi-val text-success" id="kpi-crypto">99.9%</span>
+              <span class="kpi-badge badge-up">Hardware RoT</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pbi-card kpi-card">
+          <div class="kpi-icon icon-drops">🚫</div>
+          <div class="kpi-content">
+            <span class="kpi-title">DROPPED UNTRUSTED PKTS</span>
+            <div class="kpi-value-row">
+              <span class="kpi-val text-warning" id="kpi-drops">14 pps</span>
+              <span class="kpi-badge badge-down">SDN Enforced</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pbi-card kpi-card">
+          <div class="kpi-icon icon-latency">⏱️</div>
+          <div class="kpi-content">
+            <span class="kpi-title">MEAN DPU LATENCY</span>
+            <div class="kpi-value-row">
+              <span class="kpi-val" id="kpi-latency">0.32 ms</span>
+              <span class="kpi-badge badge-up">Sub-millisecond</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Power BI Visuals Grid -->
+      <div class="pbi-charts-grid">
+        <!-- Visual 1: Trust Score Distribution -->
+        <div class="pbi-card chart-card">
+          <div class="chart-header">
+            <h3>Trust Score Distribution by Node</h3>
+            <span class="pbi-tag">Bar Visual</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chart-trust-distribution"></canvas>
+          </div>
+        </div>
+
+        <!-- Visual 2: Hardware Telemetry Time Series -->
+        <div class="pbi-card chart-card">
+          <div class="chart-header">
+            <h3>Real-Time Telemetry: Throughput vs Crypto Load</h3>
+            <span class="pbi-tag">Stream Visual</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="chart-telemetry-stream"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Split: SDN Flow Rules Matrix & Threat Audit Log -->
+      <div class="pbi-bottom-grid">
+        <!-- Flow Rules Table -->
+        <div class="pbi-card table-card">
+          <div class="chart-header">
+            <h3>SDN OpenFlow / P4 Offload Table</h3>
+            <span class="pbi-tag" id="flow-count-tag">10 Rules Active</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="pbi-table" id="flow-table">
+              <thead>
+                <tr>
+                  <th>Rule ID</th>
+                  <th>Match Src</th>
+                  <th>Match Dst</th>
+                  <th>Proto</th>
+                  <th>Action</th>
+                  <th>Packets</th>
+                  <th>Bytes</th>
+                </tr>
+              </thead>
+              <tbody id="flow-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Threat & Anomaly Feed -->
+        <div class="pbi-card feed-card">
+          <div class="chart-header">
+            <h3>Zero-Trust Anomaly & Security Log</h3>
+            <span class="pbi-tag badge-pulse">LIVE AUDIT</span>
+          </div>
+          <div class="anomaly-feed" id="anomaly-feed-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Script Modules -->
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

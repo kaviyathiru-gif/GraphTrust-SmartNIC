@@ -1,0 +1,205 @@
+{
+  "nodes": [
+    {
+      "id": "ca-root",
+      "label": "Attestation Authority (CA)",
+      "type": "attestation_authority",
+      "status": "trusted",
+      "trust_score": 100.0,
+      "ip": "10.0.0.1",
+      "role": "Root Trust Anchor",
+      "x": 400,
+      "y": 100
+    },
+    {
+      "id": "sdn-spine-1",
+      "label": "SDN Spine Switch-1",
+      "type": "sdn_switch",
+      "status": "trusted",
+      "trust_score": 98.5,
+      "ip": "10.0.0.10",
+      "role": "SDN Core Fabric",
+      "x": 250,
+      "y": 250
+    },
+    {
+      "id": "sdn-spine-2",
+      "label": "SDN Spine Switch-2",
+      "type": "sdn_switch",
+      "status": "trusted",
+      "trust_score": 97.8,
+      "ip": "10.0.0.11",
+      "role": "SDN Core Fabric",
+      "x": 550,
+      "y": 250
+    },
+    {
+      "id": "dpu-edge-01",
+      "label": "Smart NIC DPU 01",
+      "type": "smart_nic",
+      "status": "trusted",
+      "trust_score": 96.2,
+      "ip": "10.0.1.101",
+      "role": "PCIe Offload DPU (BF3)",
+      "x": 150,
+      "y": 420
+    },
+    {
+      "id": "dpu-edge-02",
+      "label": "Smart NIC DPU 02",
+      "type": "smart_nic",
+      "status": "trusted",
+      "trust_score": 95.0,
+      "ip": "10.0.1.102",
+      "role": "PCIe Offload DPU (Pensando)",
+      "x": 350,
+      "y": 420
+    },
+    {
+      "id": "dpu-edge-03",
+      "label": "Smart NIC DPU 03",
+      "type": "smart_nic",
+      "status": "trusted",
+      "trust_score": 94.8,
+      "ip": "10.0.1.103",
+      "role": "PCIe Offload DPU (BF3)",
+      "x": 650,
+      "y": 420
+    },
+    {
+      "id": "host-k8s-worker",
+      "label": "Compute Host (K8s)",
+      "type": "host_compute",
+      "status": "trusted",
+      "trust_score": 92.0,
+      "ip": "10.0.2.201",
+      "role": "Workload Server",
+      "x": 150,
+      "y": 570
+    },
+    {
+      "id": "host-ai-inference",
+      "label": "AI Inference Node",
+      "type": "host_compute",
+      "status": "trusted",
+      "trust_score": 93.4,
+      "ip": "10.0.2.202",
+      "role": "GPU Cluster Host",
+      "x": 350,
+      "y": 570
+    },
+    {
+      "id": "gw-border-router",
+      "label": "Edge Zero-Trust GW",
+      "type": "gateway",
+      "status": "trusted",
+      "trust_score": 99.1,
+      "ip": "192.168.1.1",
+      "role": "Perimeter Gateway",
+      "x": 650,
+      "y": 570
+    }
+  ],
+  "links": [
+    {
+      "id": "l-ca-spine1",
+      "source": "ca-root",
+      "target": "sdn-spine-1",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.2,
+      "trust_weight": 1.0,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 24
+    },
+    {
+      "id": "l-ca-spine2",
+      "source": "ca-root",
+      "target": "sdn-spine-2",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.2,
+      "trust_weight": 1.0,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 22
+    },
+    {
+      "id": "l-spine1-spine2",
+      "source": "sdn-spine-1",
+      "target": "sdn-spine-2",
+      "bandwidth_gbps": 400,
+      "latency_ms": 0.15,
+      "trust_weight": 0.98,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 88
+    },
+    {
+      "id": "l-spine1-dpu1",
+      "source": "sdn-spine-1",
+      "target": "dpu-edge-01",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.35,
+      "trust_weight": 0.96,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 16
+    },
+    {
+      "id": "l-spine1-dpu2",
+      "source": "sdn-spine-1",
+      "target": "dpu-edge-02",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.4,
+      "trust_weight": 0.95,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 20
+    },
+    {
+      "id": "l-spine2-dpu2",
+      "source": "sdn-spine-2",
+      "target": "dpu-edge-02",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.38,
+      "trust_weight": 0.95,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 18
+    },
+    {
+      "id": "l-spine2-dpu3",
+      "source": "sdn-spine-2",
+      "target": "dpu-edge-03",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.42,
+      "trust_weight": 0.94,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 14
+    },
+    {
+      "id": "l-dpu1-host1",
+      "source": "dpu-edge-01",
+      "target": "host-k8s-worker",
+      "bandwidth_gbps": 200,
+      "latency_ms": 0.05,
+      "trust_weight": 0.97,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 45
+    },
+    {
+      "id": "l-dpu2-host2",
+      "source": "dpu-edge-02",
+      "target": "host-ai-inference",
+      "bandwidth_gbps": 200,
+      "latency_ms": 0.05,
+      "trust_weight": 0.96,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 64
+    },
+    {
+      "id": "l-dpu3-gw",
+      "source": "dpu-edge-03",
+      "target": "gw-border-router",
+      "bandwidth_gbps": 100,
+      "latency_ms": 0.48,
+      "trust_weight": 0.98,
+      "ipsec_hw_offloaded": true,
+      "active_flows": 32
+    }
+  ]
+}

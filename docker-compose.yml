@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trustnet-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SIMULATION_INTERVAL_MS=1000
+      - ENABLE_MOCK_TELEMETRY=true
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - ./backend:/app/backend
+      - ./simulator:/app/simulator
+      - ./scripts:/app/scripts
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:alpine
+    container_name: trustnet-frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
